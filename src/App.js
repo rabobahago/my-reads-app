@@ -1,9 +1,11 @@
-import React from "react";
+import React, { Component } from "react";
+import { Route } from "react-router-dom";
 import * as BooksAPI from "./BooksAPI";
 import "./App.css";
 import MainPage from "./components/MainPage";
 import SearchPage from "./components/SearchPage";
-class BooksApp extends React.Component {
+
+class App extends Component {
   state = {
     books: [],
     /**
@@ -12,7 +14,9 @@ class BooksApp extends React.Component {
      * users can use the browser's back and forward buttons to navigate between
      * pages, as well as provide a good URL they can bookmark and share.
      */
-    showSearchPage: false
+    showSearchPage: false,
+    searchBooks: [],
+    screen: "shelves"
   };
   componentDidMount() {
     BooksAPI.getAll().then((books) => {
@@ -23,21 +27,48 @@ class BooksApp extends React.Component {
       });
     });
   }
-
+  updateShelves = (book, shelf) => {
+    BooksAPI.update(book, shelf).then(() => {
+      BooksAPI.getAll().then((res) => {
+        this.setState(() => {
+          return {
+            books: res,
+            searchBooks: res
+          };
+        });
+      });
+    });
+  };
   render() {
     console.log(this.state);
     return (
       <div className="app">
         <Route
-          path="/main"
+          exact
+          path="/"
           render={() => {
-            <MainPage showSearchPage={this.state.showSearchPage} />;
+            return (
+              <MainPage
+                books={this.state.books}
+                onUpdateShelves={this.updateShelves}
+                onNavigate={() => {
+                  this.setState({ screen: "search" });
+                }}
+                shelves={this.shelves}
+              />
+            );
           }}
         />
         <Route
           path="/search"
           render={() => {
-            <MainPage showSearchPage={this.state.showSearchPage} />;
+            return (
+              <SearchPage
+                books={this.state.books}
+                shelves={this.shelves}
+                onUpdateShelves={this.updateShelves}
+              />
+            );
           }}
         />
       </div>
@@ -45,4 +76,4 @@ class BooksApp extends React.Component {
   }
 }
 
-export default BooksApp;
+export default App;
