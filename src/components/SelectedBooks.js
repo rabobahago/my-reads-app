@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import Book from "./Book";
 
 class Selected extends Component {
   render() {
@@ -14,7 +15,7 @@ class Selected extends Component {
           <ol className="books-grid">
             {filteredBooks.map((book) => (
               <li key={book.id}>
-                <Book onUpdateShelves={onUpdateShelves} />
+                <Book onUpdateShelves={onUpdateShelves} book={book} />
               </li>
             ))}
           </ol>
