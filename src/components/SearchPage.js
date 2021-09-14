@@ -1,8 +1,43 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-
+import * as BooksAPI from "../BooksAPI";
+import Book from "./Book";
 class SearchPage extends Component {
+  state = {
+    query: "",
+    searchBook: []
+  };
+  updateQuery = async (query) => {
+    this.setState(() => {
+      return {
+        query
+      };
+    });
+    if (query === "") {
+      this.setState(() => ({ searchBook: [] }));
+    } else if (query !== "") {
+      const searchBooks = await BooksAPI.search(query);
+      try {
+        if (searchBooks.length > 0 && searchBooks !== undefined) {
+          this.setState({ searchBook: searchBooks });
+        } else if (searchBooks.errors || searchBooks === undefined) {
+          this.setState(() => {
+            return {
+              searchBook: []
+            };
+          });
+        } else {
+          this.setState({ searchBook: [] });
+        }
+        return searchBooks;
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
   render() {
+    const { searchBook: showBooks, query } = this.state;
+    const { onUpdateShelves: updateShelves, books } = this.props;
     return (
       <div className="search-books">
         <div className="search-books-bar">
@@ -18,11 +53,29 @@ class SearchPage extends Component {
                   However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
                   you don't find a specific author or title. Every search is limited by search terms.
                 */}
-            <input type="text" placeholder="Search by title or author" />
+            <input
+              type="text"
+              placeholder="Search by title or author"
+              value={query}
+              onChange={(e) => this.updateQuery(e.target.value)}
+            />
           </div>
         </div>
         <div className="search-books-results">
-          <ol className="books-grid"></ol>
+          <ol className="books-grid">
+            {showBooks.map((book) => {
+              const bookOnShelf = books.find(({ id }) => book.id === id);
+              const shelf = bookOnShelf ? bookOnShelf.shelf : "none";
+              return (
+                <li key={book.id}>
+                  <Book
+                    book={{ ...book, shelf }}
+                    updateShelves={updateShelves}
+                  />
+                </li>
+              );
+            })}
+          </ol>
         </div>
       </div>
     );

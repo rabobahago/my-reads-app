@@ -53,7 +53,6 @@ class App extends Component {
                 onNavigate={() => {
                   this.setState({ screen: "search" });
                 }}
-                shelves={this.shelves}
               />
             );
           }}
@@ -64,7 +63,6 @@ class App extends Component {
             return (
               <SearchPage
                 books={this.state.books}
-                shelves={this.shelves}
                 onUpdateShelves={this.updateShelves}
               />
             );
