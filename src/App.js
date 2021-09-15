@@ -15,7 +15,6 @@ class App extends Component {
      * pages, as well as provide a good URL they can bookmark and share.
      */
     showSearchPage: false,
-    searchBooks: [],
     screen: "shelves"
   };
   componentDidMount() {
@@ -28,15 +27,11 @@ class App extends Component {
     });
   }
   updateShelves = (book, shelf) => {
-    BooksAPI.update(book, shelf).then(() => {
-      BooksAPI.getAll().then((res) => {
-        this.setState(() => {
-          return {
-            books: res,
-            searchBooks: res
-          };
-        });
-      });
+    BooksAPI.update(book, shelf).then((result) => {
+      book.shelf = shelf;
+      this.setState((currentState) => ({
+        books: currentState.books.filter((y) => y.id !== book.id).concat([book])
+      }));
     });
   };
   render() {
@@ -53,7 +48,6 @@ class App extends Component {
                 onNavigate={() => {
                   this.setState({ screen: "search" });
                 }}
-                shelves={this.shelves}
               />
             );
           }}
@@ -64,7 +58,6 @@ class App extends Component {
             return (
               <SearchPage
                 books={this.state.books}
-                shelves={this.shelves}
                 onUpdateShelves={this.updateShelves}
               />
             );
